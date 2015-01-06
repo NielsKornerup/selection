@@ -9,22 +9,24 @@ var pollen=[];
 var width = canvas.width;
 var height = canvas.height;
 var numProducers = 70;
-var numHerbivores = 20;//20;
+var numHerbivores = 30;//20;
 var numCarnivores = 10;//10;
 var maxSpeed = 1.5;
-var maxSize = 50;
+var maxSize = 70;
+var maxPollenSize = 3;
 var PI = 3.141592;
 var frameNumber  = 0;
 var plantNumber = 0;
 var maxHealth = 5000;
-var maxProducers = 50;
+var maxProducers = 100;
+var gridSize=100;
 var areas = [];
 var arr = [];
 var debug=false;
-for(var a = 0; a < 4; a++){
+for(var a = 0; a < gridSize; a++){
 	arr = [];
 	areas.push(arr);
-	for(var b = 0; b < 4; b++){
+	for(var b = 0; b < gridSize; b++){
 		arr=[];
 		areas[a].push(arr);
 	}
@@ -63,64 +65,32 @@ if(debug){
 }
 
 function addPlantToArea(lifeform){
-	if(lifeform.position.x <= (width/4)+lifeform.traits.radius){
-		if(lifeform.position.y <= (height/4)+lifeform.traits.radius){
-			areas[0][0].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (height/4)) && (lifeform.position.y <=(height/2)+lifeform.traits.radius)){
-			areas[0][1].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (height/2)) && (lifeform.position.y <=(3*height/4)+lifeform.traits.radius)){
-			areas[0][2].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (3*height/4))){
-			areas[0][3].push(lifeform);
+	var possibleX = [];
+	var possibleY = [];
+	for(var x = 0; x < gridSize; x++){
+		if(lifeform.position.x + lifeform.traits.radius + maxSize >= ((x)*width/gridSize) && (lifeform.position.x <= ((x+1)*width/gridSize) + lifeform.traits.radius + maxSize)){
+			possibleX.push(x);
+			console.log("X is "+x);
 		}
 	}
-	if(lifeform.position.x + lifeform.traits.radius >= (width/4) && (lifeform.position.x <= (width/2)+lifeform.traits.radius)){
-		if(lifeform.position.y<= (height/4)+lifeform.traits.radius){
-			areas[1][0].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (height/4)) && (lifeform.position.y <=(height/2)+lifeform.traits.radius)){
-			areas[1][1].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (height/2)) && (lifeform.position.y <=(3*height/4)+lifeform.traits.radius)){
-			areas[1][2].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (3*height/4))){
-			areas[1][3].push(lifeform);
+	for(var y = 0; y < gridSize; y++){
+		if(lifeform.position.y + lifeform.traits.radius + maxSize >= ((y)*height/gridSize) && (lifeform.position.y <= ((y+1)*height/gridSize) + lifeform.traits.radius + maxSize)){
+			possibleY.push(y);
+			console.log("Y is " + y);
 		}
 	}
-	if(lifeform.position.x + lifeform.traits.radius >= (width/2) && (lifeform.position.x <= (3*width/4)+lifeform.traits.radius)){
-		if(lifeform.position.y <= (height/4)+lifeform.traits.radius){
-			areas[2][0].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (height/4)) && (lifeform.position.y <=(height/2)+lifeform.traits.radius)){
-			areas[2][1].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (height/2)) && (lifeform.position.y <=(3*height/4)+lifeform.traits.radius)){
-			areas[2][2].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (3*height/4))){
-			areas[2][3].push(lifeform);
-		}
-	}
-	if(lifeform.position.x + lifeform.traits.radius >= (3*width/4)){
-		if(lifeform.position.y <= (height/4)+lifeform.traits.radius){
-			areas[3][0].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (height/4)) && (lifeform.position.y <=(height/2)+lifeform.traits.radius)){
-			areas[3][1].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (height/2)) && (lifeform.position.y <=(3*height/4)+lifeform.traits.radius)){
-			areas[3][2].push(lifeform);
-		}
-		if((lifeform.position.y + lifeform.traits.radius >= (3*height/4))){
-			areas[3][3].push(lifeform);
+	for(var x = 0; x < possibleX.length; x++){
+		for(var y = 0; y < possibleY.length; y++){
+			areas[possibleX[x]][possibleY[y]].push(lifeform);
+			console.log("Plant in " + possibleX[x] + ", " + possibleY[y]);
 		}
 	}
 }
-
+function getArea(obj){
+	var x = Math.min(Math.max(Math.floor(gridSize*obj.position.x/width),0),gridSize-1);
+	var y = Math.min(Math.max(Math.floor(gridSize*obj.position.y/height),0),gridSize-1);
+	return areas[x][y];
+}
 function setup(){
 	var lifeform;
 	var angle = 0;
@@ -132,12 +102,13 @@ function setup(){
 
 		lifeform.traits.id=plantNumber;
 		plantNumber++;
-		lifeform.traits.pollenRate = Math.ceil(580*Math.random())+20;
+		lifeform.traits.pollenRate = Math.ceil(580*Math.random());
 		lifeform.traits.pollenSize = (3*Math.random());
 		lifeform.traits.reproductionRate = Math.random();
 		lifeform.traits.germinationPeriod = Math.ceil(500*Math.random());
 		lifeform.traits.radius = (20*Math.random());
 		lifeform.traits.age = 0;
+		lifeform.traits.alive = true;
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
 		lifeform.position.y = lifeform.traits.radius+(Math.random()*(height-lifeform.traits.radius));
 		var connected = true;
@@ -184,7 +155,7 @@ function setup(){
 		lifeform.velocity.x = lifeform.traits.speed*Math.cos(angle);
 		lifeform.velocity.y = lifeform.traits.speed*Math.sin(angle);
 		herbivores.push(lifeform);
-		lifeform.traits.index = plantNumber-1
+		lifeform.traits.index = plantNumber-1;
 	}
 
 	for(var i = 0; i < numCarnivores; i++){
@@ -213,36 +184,20 @@ function updateScreen(){
 	ctx.fillStyle = "rgba(255,255,255,.2)";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	if(debug){
-		ctx.beginPath();
-		ctx.moveTo(width/4,0);
-		ctx.lineTo((width/4),(height));
-		ctx.fill();
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.moveTo(width/2,0);
-		ctx.lineTo((width/2),(height));
-		ctx.fill();
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.moveTo(3*width/4,0);
-		ctx.lineTo((3*width/4),(height));
-		ctx.fill();
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.moveTo(0,height/4);
-		ctx.lineTo((width),(height/4));
-		ctx.fill();
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.moveTo(0,height/2);
-		ctx.lineTo((width),(height/2));
-		ctx.fill();
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.moveTo(0,3*height/4);
-		ctx.lineTo((width),(3*height/4));
-		ctx.fill();
-		ctx.stroke();
+		for(var x = 0; x < gridSize; x++){
+			ctx.beginPath();
+			ctx.moveTo(x*width/gridSize,0);
+			ctx.lineTo((x*width/gridSize),(height));
+			ctx.fill();
+			ctx.stroke();
+		}
+		for(var y = 0; y < gridSize; y++){
+			ctx.beginPath();
+			ctx.moveTo(0,y*height/gridSize);
+			ctx.lineTo((width),(y*height/gridSize));
+			ctx.fill();
+			ctx.stroke();
+		}
 	}
 	for (var i = 0; i < producers.length; i++) {
 		particle = producers[i];
@@ -284,8 +239,7 @@ function updateScreen(){
 		ctx.beginPath();
 		var colorString = 'rgb(0,255,255)';
 		ctx.strokeStyle = colorString;
-		ctx.arc(player.position.x, player.position.y, 10, 0, 2 * PI);
-		//console.log(player.position.x+" "+player.position.y);
+		ctx.arc(player.position.x, player.position.y, player.traits.radius, 0, 2 * PI);
 		ctx.fill();
 		ctx.stroke();
 	}
@@ -389,9 +343,6 @@ function generatePollen(){
 	var autotroph;
 	for(var i = 0; i < producers.length; i++){
 		autotroph = producers[i];
-		if(debug){
-			console.log(i + " " + autotroph.traits.index);
-		}
 		if(autotroph.traits.age <= 0 && frameNumber%autotroph.traits.pollenRate==0){
 			var gamete = new Object();
 			gamete.position = new Object();
@@ -420,17 +371,18 @@ function newProducer(mother, father){
 	child.position = new Object();
 	child.velocity = new Object();
 	child.traits = new Object();
-	child.traits.pollenRate = Math.ceil(((mother.traits.pollenRate+father.traits.pollenRate)/2)+2*(Math.random()-0.5));
+	child.traits.pollenRate = Math.ceil(((mother.traits.pollenRate+father.traits.pollenRate)/2)+10*(Math.random()-0.5));
 	child.traits.pollenSize = (((mother.traits.pollenSize+father.traits.pollenSize)/2)+2*(Math.random()-0.5));
-	child.traits.reproductionRate = Math.max(Math.min(((mother.traits.reproductionRate+father.traits.reproductionRate)/2)+0.01*(Math.random()-0.5),1),0); //makes sure this value remains between zero and one
-	child.traits.germinationPeriod = ((mother.traits.germinationPeriod+father.traits.germinationPeriod)/2)+6*(Math.random()-0.5);
+	child.traits.reproductionRate = Math.max(Math.min(((mother.traits.reproductionRate+father.traits.reproductionRate)/2)+0.1*(Math.random()-0.5),1),0); //makes sure this value remains between zero and one
+	child.traits.germinationPeriod = ((mother.traits.germinationPeriod+father.traits.germinationPeriod)/2)+10*(Math.random()-0.5);
 	child.traits.age = child.traits.germinationPeriod;
-	child.traits.radius = Math.max(Math.min(((mother.traits.radius+father.traits.radius)/2)+0.6*(Math.random()-0.5),maxSize),0.5); //makes sure that this value is reasonable
+	child.traits.radius = Math.max(Math.min(((mother.traits.radius+father.traits.radius)/2)+1*(Math.random()-0.5),maxSize),0.5); //makes sure that this value is reasonable
+	child.traits.alive = true;
 	child.position.x = mother.position.x + 200*(Math.random()-0.5);
 	child.position.y = mother.position.y + 200*(Math.random()-0.5);
 	var connected = true;
 	var found = false;
-	var nearby = areas[Math.min(Math.max(Math.floor(4*child.position.x/width),0),3)][Math.min(Math.max(Math.floor(4*child.position.y/height),0),3)];
+	var nearby = getArea(child);
 	while(connected){
 		found = false;
 		for(var p = 0; !found && p < nearby.length; p++){
@@ -458,16 +410,16 @@ function newHerbivore(mother, father){
 	child.position = new Object();
 	child.velocity = new Object();
 	child.traits = new Object();
-	child.traits.fullHealth = Math.ceil(((mother.traits.fullHealth+father.traits.fullHealth)/2)+50*(Math.random()-0.5));
+	child.traits.fullHealth = Math.ceil(((mother.traits.fullHealth+father.traits.fullHealth)/2)+100*(Math.random()-0.5));
 	child.traits.health = child.traits.fullHealth;
-	child.traits.reproductionRate = Math.max(Math.min(((mother.traits.reproductionRate+father.traits.reproductionRate)/2)+0.01*(Math.random()-0.5),1),0); //makes sure this value remains between zero and one
-	child.traits.growthPeriod = ((mother.traits.growthPeriod+father.traits.growthPeriod)/2)+6*(Math.random()-0.5);
+	child.traits.reproductionRate = Math.max(Math.min(((mother.traits.reproductionRate+father.traits.reproductionRate)/2)+0.1*(Math.random()-0.5),1),0); //makes sure this value remains between zero and one
+	child.traits.growthPeriod = ((mother.traits.growthPeriod+father.traits.growthPeriod)/2)+10*(Math.random()-0.5);
 	child.traits.age = child.traits.growthPeriod;
-	child.traits.radius = Math.max(Math.min(((mother.traits.radius+father.traits.radius)/2)+0.6*(Math.random()-0.5),maxSize),1); //makes sure that this value is reasonable
+	child.traits.radius = Math.max(Math.min(((mother.traits.radius+father.traits.radius)/2)+1*(Math.random()-0.5),maxSize),1); //makes sure that this value is reasonable
 	child.traits.mass = Math.pow(child.traits.radius,2);
 	child.position.x = (mother.position.x + father.position.x)/2;
 	child.position.y = (mother.position.y + father.position.y)/2;
-	child.traits.speed = Math.max(Math.min(mother.traits.speed+father.traits.speed+0.2*(Math.random()-0.5),maxSpeed),0.1);
+	child.traits.speed = Math.max(Math.min(mother.traits.speed+father.traits.speed+0.4*(Math.random()-0.5),maxSpeed),0.1);
 	var angle = 2*PI*Math.random();
 	child.velocity.x = child.traits.speed*Math.cos(angle);
 	child.velocity.y = child.traits.speed*Math.sin(angle);
@@ -478,16 +430,16 @@ function newCarnivore(mother, father){
 	child.position = new Object();
 	child.velocity = new Object();
 	child.traits = new Object();
-	child.traits.fullHealth = Math.ceil(((mother.traits.fullHealth+father.traits.fullHealth)/2)+50*(Math.random()-0.5));
+	child.traits.fullHealth = Math.ceil(((mother.traits.fullHealth+father.traits.fullHealth)/2)+100*(Math.random()-0.5));
 	child.traits.health = child.traits.fullHealth;
-	child.traits.reproductionRate = Math.max(Math.min(((mother.traits.reproductionRate+father.traits.reproductionRate)/2)+0.01*(Math.random()-0.5),1),0); //makes sure this value remains between zero and one
-	child.traits.growthPeriod = ((mother.traits.growthPeriod+father.traits.growthPeriod)/2)+6*(Math.random()-0.5);
+	child.traits.reproductionRate = Math.max(Math.min(((mother.traits.reproductionRate+father.traits.reproductionRate)/2)+0.1*(Math.random()-0.5),1),0); //makes sure this value remains between zero and one
+	child.traits.growthPeriod = ((mother.traits.growthPeriod+father.traits.growthPeriod)/2)+10*(Math.random()-0.5);
 	child.traits.age = child.traits.growthPeriod;
-	child.traits.radius = Math.max(Math.min(((mother.traits.radius+father.traits.radius)/2)+0.6*(Math.random()-0.5),maxSize),1); //makes sure that this value is reasonable
+	child.traits.radius = Math.max(Math.min(((mother.traits.radius+father.traits.radius)/2)+1*(Math.random()-0.5),maxSize),1); //makes sure that this value is reasonable
 	child.traits.mass = Math.pow(child.traits.radius,2);
 	child.position.x = (mother.position.x + father.position.x)/2;
 	child.position.y = (mother.position.y + father.position.y)/2;
-	child.traits.speed = Math.max(Math.min(mother.traits.speed+father.traits.speed+0.2*(Math.random()-0.5),maxSpeed),0.1);
+	child.traits.speed = Math.max(Math.min(mother.traits.speed+father.traits.speed+0.4*(Math.random()-0.5),maxSpeed),0.1);
 	var angle = 2*PI*Math.random();
 	child.velocity.x = child.traits.speed*Math.cos(angle);
 	child.velocity.y = child.traits.speed*Math.sin(angle);
@@ -502,27 +454,31 @@ function reproduce(){
 	var gamete;
 	var area;
 	var found;
-	if(maxProducers<=numProducers){
-		for(var g = 0; g < pollen.length; g++){
-			gamete = pollen[g];
-			found = false;
-			area = areas[Math.min(Math.max(Math.floor(4*gamete.position.x/width),0),3)][Math.min(Math.max(Math.floor(4*gamete.position.y/height),0),3)];
-			for(var p = 0; p < area.length; p++){
-				if(area[p].traits.age<=0){
-					producer = area[p];
-					var xDistance = producer.position.x - gamete.position.x;
-					var yDistance = producer.position.y - gamete.position.y;
-					distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-					if(producer.traits.id != gamete.traits.id && distance<=producer.traits.radius+gamete.traits.pollenSize && Math.random()<producer.traits.reproductionRate){
+	console.log("test");
+	for(var g = 0; g < pollen.length; g++){
+		gamete = pollen[g];
+		found = false;
+		area = getArea(gamete);
+		for(var p = 0; p < area.length; p++){
+			producer = area[p];
+			if(producer.traits.alive){
+				var xDistance = producer.position.x - gamete.position.x;
+				var yDistance = producer.position.y - gamete.position.y;
+				distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+				if(producer.traits.id != gamete.traits.id && distance<=producer.traits.radius+gamete.traits.pollenSize && Math.random()<producer.traits.reproductionRate){
+					if(area[p].traits.age<=0 && maxProducers>=numProducers){
 						newProducer(producer, gamete);
-						pollen.splice(g, 1);
-						found = true;
 					}
-					else if(producer.traits.id != gamete.traits.id && distance<=producer.traits.radius+gamete.traits.pollenSize){	
-						pollen.splice(g, 1);
-						found = true;
-					}
+					pollen.splice(g, 1);
+					found = true;
 				}
+				else if(producer.traits.id != gamete.traits.id && distance<=producer.traits.radius+gamete.traits.pollenSize){	
+					pollen.splice(g, 1);
+					found = true;
+				}
+			}
+			else{
+				area.splice(p, 1);
 			}
 		}
 	}
@@ -532,7 +488,7 @@ function reproduce(){
 		herbivore1=herbivores[h1];
 		for(var h2 = h1+1; h2 < herbivores.length; h2++){
 			herbivore2=herbivores[h2];
-			var xDistance = herbivore1.position.x - herbivore2.position.x;
+			var xDistance = herbivore1.position.x - herbivore2.position.x;console
 			var yDistance = herbivore1.position.y - herbivore2.position.y;
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 			if(distance<=herbivore1.traits.radius+herbivore2.traits.radius && Math.random()<(herbivore1.traits.reproductionRate+herbivore2.traits.reproductionRate)/2){
@@ -541,7 +497,6 @@ function reproduce(){
 					herbivore1.traits.age = 2*herbivore1.traits.growthPeriod/3;
 					herbivore2.traits.age = 2*herbivore2.traits.growthPeriod/3;
 				}
-				//bounce(herbivore1, herbivore2);
 			}
 			else if(distance<=herbivore1.traits.radius+herbivore2.traits.radius && herbivore1.traits.age <= 0 && herbivore2.traits.age <= 0){
 				herbivore1.traits.age = 2*herbivore1.traits.growthPeriod/3;
@@ -564,7 +519,6 @@ function reproduce(){
 					carnivore1.traits.age = 2*carnivore1.traits.growthPeriod/3;
 					carnivore2.traits.age = 2*carnivore2.traits.growthPeriod/3;
 				}
-				//bounce(herbivore1, herbivore2);
 			}
 			else if(distance<=carnivore1.traits.radius+carnivore2.traits.radius && carnivore1.traits.age <= 0 && carnivore2.traits.age <= 0){
 				carnivore1.traits.age = 2*carnivore1.traits.growthPeriod/3;
@@ -581,41 +535,60 @@ function consume(){
 	var predator;
 	var food;
 	var area;
+	var full;
 	for(var p = 0; p < herbivores.length; p++){
 		predator = herbivores[p];
-		//console.log(Math.min(Math.max(Math.floor(4*predator.position.x/width),0),3) + ", " + Math.min(Math.max(Math.floor(4*predator.position.y/height),0),3));
-		area = areas[Math.min(Math.max(Math.floor(4*predator.position.x/width),0),3)][Math.min(Math.max(Math.floor(4*predator.position.y/height),0),3)];
-		for(var f = 0; f < area.length; f++){
+		area = getArea(predator);
+		full = false;
+		for(var f = 0; f < area.length && !full; f++){
 			food = area[f];
-			var xDistance = predator.position.x - food.position.x;
-			var yDistance = predator.position.y - food.position.y;
-			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-			if(distance<=predator.traits.radius+food.traits.radius){
-				predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2));
-				plantNumber--;
-				producers.splice(food.traits.index, 1);
-				area.splice(f, 1);
-				for(var i=0; i < producers.length; i++){
-					producers[i].traits.index=i
+			if(food.traits.alive){
+				var xDistance = predator.position.x - food.position.x;
+				var yDistance = predator.position.y - food.position.y;
+				distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+				if(distance<=predator.traits.radius+food.traits.radius){
+					predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2));
+					plantNumber--;
+					console.log(food.traits.radius + " goes with " + producers[food.traits.index].traits.radius);
+					food.traits.alive=false;
+					producers.splice(food.traits.index, 1);
+					area.splice(f, 1);
+					full=true;
+					for(var i=0; i < producers.length; i++){
+						producers[i].traits.index=i;
+					}
 				}
+			}
+			else{
+				area.splice(f, 1);
 			}
 		}
 	}
 	if(debug){
-		area = areas[Math.min(Math.max(Math.floor(4*player.position.x/width),0),3)][Math.min(Math.max(Math.floor(4*player.position.y/height),0),3)];
-		console.log("Player is in area " + Math.min(Math.max(Math.floor(4*player.position.x/width),0),3) + ", " + Math.min(Math.max(Math.floor(4*player.position.y/height),0),3));
-		for(var f = 0; f < area.length; f++){
+		full=false;
+		area = getArea(player);
+		console.log("Player is in area " + Math.min(Math.max(Math.floor(gridSize*player.position.x/width),0),gridSize-1) + ", " + Math.min(Math.max(Math.floor(gridSize*player.position.y/height),0),gridSize-1));
+		for(var f = 0; f < area.length && !full; f++){
 			food = area[f];
-			var xDistance = player.position.x - food.position.x;
-			var yDistance = player.position.y - food.position.y;
-			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-			if(distance<=player.traits.radius+food.traits.radius){
-				plantNumber--;
-				producers.splice(food.traits.index, 1);
-				area.splice(f, 1);
-				for(var i = 0; i < producers.length; i++){
-					producers[i].traits.index=i
+			if(food.traits.alive){
+				var xDistance = player.position.x - food.position.x;
+				var yDistance = player.position.y - food.position.y;
+				distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+				if(distance<=player.traits.radius+food.traits.radius){
+					plantNumber--;
+					for(var i = 0; i < producers.length; i++){
+						producers[i].traits.index=i;
+						console.log("Updated, producers["+i+"]'s index is now " + producers[i].traits.index);
+					}
+					console.log(food.traits.radius + " goes with " + producers[food.traits.index].traits.radius);
+					food.traits.alive=false;
+					producers.splice(food.traits.index, 1);
+					area.splice(f, 1);
+					full=true;
 				}
+			}
+			else{
+				area.splice(f, 1);
 			}
 		}
 	}
@@ -645,7 +618,6 @@ function move(){
 	movePollen();
 	generatePollen();
 	consume();
-	//console.log(plantNumber);
 }
 
 setup();
