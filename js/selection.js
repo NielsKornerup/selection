@@ -1,6 +1,6 @@
 var canvas = document.getElementById('canvas');
 canvas.width = window.innerWidth-30;
-canvas.height = window.innerHeight-30;
+canvas.height = window.innerHeight-50;
 var ctx = canvas.getContext("2d");
 var producers=[];
 var herbivores=[];
@@ -10,19 +10,22 @@ var width = canvas.width;
 var height = canvas.height;
 var numProducers = 70;
 var numHerbivores = 30;//20;
-var numCarnivores = 10;//10;
+var numCarnivores = 5;//10;
 var maxSpeed = 1.5;
 var maxSize = 70;
 var maxPollenSize = 3;
 var PI = 3.141592;
 var frameNumber  = 0;
 var plantNumber = 0;
-var maxHealth = 5000;
+var maxHealth = 3000;
 var maxProducers = 100;
 var gridSize=100;
 var areas = [];
 var arr = [];
 var debug=false;
+var logging = "";
+var graph = false;
+var data = [];
 for(var a = 0; a < gridSize; a++){
 	arr = [];
 	areas.push(arr);
@@ -70,19 +73,16 @@ function addPlantToArea(lifeform){
 	for(var x = 0; x < gridSize; x++){
 		if(lifeform.position.x + lifeform.traits.radius + maxSize >= ((x)*width/gridSize) && (lifeform.position.x <= ((x+1)*width/gridSize) + lifeform.traits.radius + maxSize)){
 			possibleX.push(x);
-			console.log("X is "+x);
 		}
 	}
 	for(var y = 0; y < gridSize; y++){
 		if(lifeform.position.y + lifeform.traits.radius + maxSize >= ((y)*height/gridSize) && (lifeform.position.y <= ((y+1)*height/gridSize) + lifeform.traits.radius + maxSize)){
 			possibleY.push(y);
-			console.log("Y is " + y);
 		}
 	}
 	for(var x = 0; x < possibleX.length; x++){
 		for(var y = 0; y < possibleY.length; y++){
 			areas[possibleX[x]][possibleY[y]].push(lifeform);
-			console.log("Plant in " + possibleX[x] + ", " + possibleY[y]);
 		}
 	}
 }
@@ -113,7 +113,7 @@ function setup(){
 		lifeform.position.y = lifeform.traits.radius+(Math.random()*(height-lifeform.traits.radius));
 		var connected = true;
 		var found = false;
-		var nearby = areas[Math.min(Math.max(Math.floor(4*lifeform.position.x/width),0),3)][Math.min(Math.max(Math.floor(4*lifeform.position.y/height),0),3)];
+		var nearby = getArea(lifeform);
 		while(connected){
 			found = false;
 			for(var p = 0; !found && p < nearby.length; p++){
@@ -143,7 +143,7 @@ function setup(){
 
 		lifeform.traits.age = 0;
 		lifeform.traits.growthPeriod = Math.ceil(1000*Math.random());
-		lifeform.traits.fullHealth = 2*maxHealth*Math.random();
+		lifeform.traits.fullHealth = maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
 		lifeform.traits.reproductionRate = Math.random();
 		lifeform.traits.radius = Math.ceil(30*Math.random());
@@ -166,9 +166,9 @@ function setup(){
 
 		lifeform.traits.age = 0;
 		lifeform.traits.growthPeriod = Math.ceil(1000*Math.random());
-		lifeform.traits.fullHealth = maxHealth*Math.random();
+		lifeform.traits.fullHealth = 2*maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
-		lifeform.traits.reproductionRate = Math.random();
+		lifeform.traits.reproductionRate = Math.random()*0.5+0.5;
 		lifeform.traits.radius = Math.ceil(40*Math.random());
 		lifeform.traits.speed = Math.random()*maxSpeed;
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
@@ -201,12 +201,18 @@ function updateScreen(){
 	}
 	for (var i = 0; i < producers.length; i++) {
 		particle = producers[i];
-		ctx.beginPath();
-		var colorString = 'rgb(0,255,0)';
-		ctx.strokeStyle = colorString;
-		ctx.arc(particle.position.x, particle.position.y, particle.traits.radius, 0, 2 * PI);
-		ctx.fill();
-		ctx.stroke();
+		if(!particle.traits.alive){
+			producers.splice(i, 1);
+			i--;
+		}
+		else{
+			ctx.beginPath();
+			var colorString = 'rgb(0,255,0)';
+			ctx.strokeStyle = colorString;
+			ctx.arc(particle.position.x, particle.position.y, particle.traits.radius, 0, 2 * PI);
+			ctx.fill();
+			ctx.stroke();
+		}
 	}
 	for (var i = 0; i < herbivores.length; i++) {
 		particle = herbivores[i];
@@ -454,7 +460,6 @@ function reproduce(){
 	var gamete;
 	var area;
 	var found;
-	console.log("test");
 	for(var g = 0; g < pollen.length; g++){
 		gamete = pollen[g];
 		found = false;
@@ -488,7 +493,7 @@ function reproduce(){
 		herbivore1=herbivores[h1];
 		for(var h2 = h1+1; h2 < herbivores.length; h2++){
 			herbivore2=herbivores[h2];
-			var xDistance = herbivore1.position.x - herbivore2.position.x;console
+			var xDistance = herbivore1.position.x - herbivore2.position.x;
 			var yDistance = herbivore1.position.y - herbivore2.position.y;
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 			if(distance<=herbivore1.traits.radius+herbivore2.traits.radius && Math.random()<(herbivore1.traits.reproductionRate+herbivore2.traits.reproductionRate)/2){
@@ -549,7 +554,6 @@ function consume(){
 				if(distance<=predator.traits.radius+food.traits.radius){
 					predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2));
 					plantNumber--;
-					console.log(food.traits.radius + " goes with " + producers[food.traits.index].traits.radius);
 					food.traits.alive=false;
 					producers.splice(food.traits.index, 1);
 					area.splice(f, 1);
@@ -611,6 +615,22 @@ function consume(){
 	}
 }
 
+function logData(){
+	if(logging=="Population sizes"){
+		data.push(producers.length);
+		data.push(herbivores.length);
+		data.push(carnivores.length);
+	}
+	else if(logging=="Germination period"){
+		var avgGermPeriod=0;
+		for(var i = 0; i < producers.length; i++){
+			avgGermPeriod+=producers[i].traits.germinationPeriod;
+		}
+		avgGermPeriod/=producers.length;
+		data.push(avgGermPeriod);
+	}
+}
+
 function move(){
 	frameNumber++;
 	reproduce();
@@ -618,12 +638,89 @@ function move(){
 	movePollen();
 	generatePollen();
 	consume();
+	logData();
 }
 
+function makePopGraph(){
+	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+	var maxY=0;
+	for(var i = 0; i < data.length; i++){
+		maxY=Math.max(maxY,data[i]);
+	}
+	var virtScale = height/maxY;
+	var horScale = 3*width/data.length;
+	for(var i = 3; i < data.length; i+=3){
+		ctx.beginPath();
+		var colorString = 'rgb(0,255,0)';
+		ctx.strokeStyle = colorString;
+		ctx.moveTo(horScale*Math.floor((i/3)-1),height-virtScale*data[i-3]);
+		ctx.lineTo(horScale*Math.floor((i/3)),height-virtScale*data[i]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	for(var i = 4; i < data.length; i+=3){
+		ctx.beginPath();
+		var colorString = 'rgb(0,0,255)';
+		ctx.strokeStyle = colorString;
+		ctx.moveTo(horScale*Math.floor((i/3)-1),height-virtScale*data[i-3]);
+		ctx.lineTo(horScale*Math.floor((i/3)),height-virtScale*data[i]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	for(var i = 5; i < data.length; i+=3){
+		ctx.beginPath();
+		var colorString = 'rgb(255,0,0)';
+		ctx.strokeStyle = colorString;
+		ctx.moveTo(horScale*Math.floor((i/3)-1),height-virtScale*data[i-3]);
+		ctx.lineTo(horScale*Math.floor((i/3)),height-virtScale*data[i]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+};
+
+function makeGraph(){
+	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+	var maxY=0;
+	for(var i = 0; i < data.length; i++){
+		maxY=Math.max(maxY,data[i]);
+	}
+	var virtScale = height/maxY;
+	var horScale = 3*width/data.length;
+	for(var i = 1; i < data.length; i++){
+		ctx.beginPath();
+		var colorString = 'rgb(0,0,0)';
+		ctx.strokeStyle = colorString;
+		ctx.moveTo(horScale*(i-1),height-virtScale*data[i-1]);
+		ctx.lineTo(horScale*i,height-virtScale*data[i]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+};
+
+$("#controls-log").click(function() {
+	logging = $("#Var option:selected").text();
+	data = [];
+});
+
+$("#controls-graph").click(function() {
+	graph=true;
+});
+
 setup();
+
 function main() {
-	move();
-	updateScreen();
-	requestAnimationFrame(main);
+	if(!graph){
+		move();
+		updateScreen();
+		requestAnimationFrame(main);
+	}
+	else if(logging=="Population sizes"){
+		makePopGraph();
+	}
+	else{
+		makeGraph();
+	}
 };
 requestAnimationFrame(main);
