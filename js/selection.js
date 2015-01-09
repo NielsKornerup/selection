@@ -27,7 +27,7 @@ var logging = "";
 var graph = false;
 var data = [];
 for(var a = 0; a < gridSize; a++){
-	arr = [];https://github.com/NielsKornerup/selection/pull/3
+	arr = [];
 	areas.push(arr);
 	for(var b = 0; b < gridSize; b++){
 		arr=[];
@@ -145,7 +145,7 @@ function setup(){
 		lifeform.traits.growthPeriod = Math.ceil(1000*Math.random());
 		lifeform.traits.fullHealth = maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
-		lifeform.traits.reproductionRate = Math.random();
+		lifeform.traits.reproductionRate = 0.5+0.5*Math.random();
 		lifeform.traits.radius = Math.ceil(30*Math.random());
 		lifeform.traits.mass = Math.pow(lifeform.traits.radius,2);
 		lifeform.traits.speed = Math.random()*maxSpeed;
