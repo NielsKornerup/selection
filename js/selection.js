@@ -496,9 +496,12 @@ function reproduce(){
 			var xDistance = herbivore1.position.x - herbivore2.position.x;
 			var yDistance = herbivore1.position.y - herbivore2.position.y;
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-			if(distance<=herbivore1.traits.radius+herbivore2.traits.radius && Math.random()<(herbivore1.traits.reproductionRate+herbivore2.traits.reproductionRate)/2){
+			if(distance<=herbivore1.ielsKorntraits.radius+herbivore2.traits.radius && Math.random()<(herbivore1.traits.reproductionRate+herbivore2.traits.reproductionRate)/2){
 				if(herbivore1.traits.age <= 0 && herbivore2.traits.age <= 0){
-					newHerbivore(herbivore1, herbivore2);
+					var numChilds = Math.ceil(Math.random() * 8);
+					for(var i = 0; i < numChilds; i++){
+						newHerbivore(herbivore1, herbivore2);
+					}
 					herbivore1.traits.age = 2*herbivore1.traits.growthPeriod/3;
 					herbivore2.traits.age = 2*herbivore2.traits.growthPeriod/3;
 				}
