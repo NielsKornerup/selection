@@ -700,8 +700,16 @@ function makeGraph(){
 };
 
 $("#controls-log").click(function() {
-	logging = $("#Var option:selected").text();
-	data = [];
+	if(data.length>10){
+		if (confirm('Are you sure you want to delete your data and start logging again?')) {
+			logging = $("#Var option:selected").text();	
+			data = [];
+		}
+	}
+	else{
+		logging = $("#Var option:selected").text();	
+		data = [];
+	}
 });
 
 $("#controls-graph").click(function() {
