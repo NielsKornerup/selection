@@ -17,7 +17,7 @@ var maxPollenSize = 3;
 var PI = 3.141592;
 var frameNumber  = 0;
 var plantNumber = 0;
-var maxHealth = 3000;
+var maxHealth = 5000;
 var maxProducers = 100;
 var gridSize=100;
 var areas = [];
@@ -496,7 +496,7 @@ function reproduce(){
 			var xDistance = herbivore1.position.x - herbivore2.position.x;
 			var yDistance = herbivore1.position.y - herbivore2.position.y;
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-			if(distance<=herbivore1.ielsKorntraits.radius+herbivore2.traits.radius && Math.random()<(herbivore1.traits.reproductionRate+herbivore2.traits.reproductionRate)/2){
+			if(distance<=herbivore1.traits.radius+herbivore2.traits.radius && Math.random()<(herbivore1.traits.reproductionRate+herbivore2.traits.reproductionRate)/2){
 				if(herbivore1.traits.age <= 0 && herbivore2.traits.age <= 0){
 					var numChilds = Math.ceil(Math.random() * 8);
 					for(var i = 0; i < numChilds; i++){
