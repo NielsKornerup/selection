@@ -9,8 +9,8 @@ var pollen=[];
 var width = canvas.width;
 var height = canvas.height;
 var numProducers = 70;
-var numHerbivores = 50;//20;
-var numCarnivores = 10;//10;
+var numHerbivores = 30;
+var numCarnivores = 10;
 var maxSpeed = 1.5;
 var maxSize = 70;
 var maxPollenSize = 3;
@@ -22,10 +22,9 @@ var maxProducers = 100;
 var gridSize=100;
 var areas = [];
 var arr = [];
-var debug=false;
+var data = [];
 var logging = "";
 var graph = false;
-var data = [];
 for(var a = 0; a < gridSize; a++){
 	arr = [];
 	areas.push(arr);
@@ -33,38 +32,6 @@ for(var a = 0; a < gridSize; a++){
 		arr=[];
 		areas[a].push(arr);
 	}
-}
-
-if(debug){
-	var player = new Object();
-	player.position = new Object();
-	player.position.x = 50;
-	player.position.y = 50;
-	player.traits = new Object();
-	player.traits.radius=10;
-	rightDown = false;
-	leftDown = false;
-	upDown = false;
-	downDown = false;
-}
-
-function onKeyDown(evt) {
-	if (evt.keyCode == 39) rightDown = true;
-	else if (evt.keyCode == 37) leftDown = true;
-	else if (evt.keyCode == 38) upDown = true;
-	else if (evt.keyCode == 40) downDown = true;
-}
-
-function onKeyUp(evt) {
-	if (evt.keyCode == 39) rightDown = false;
-	else if (evt.keyCode == 37) leftDown = false;
-	else if (evt.keyCode == 38) upDown = false;
-	else if (evt.keyCode == 40) downDown = false;
-}
-
-if(debug){
-	$(document).keydown(onKeyDown);
-	$(document).keyup(onKeyUp);
 }
 
 function addPlantToArea(lifeform){
@@ -102,10 +69,10 @@ function setup(){
 
 		lifeform.traits.id=plantNumber;
 		plantNumber++;
-		lifeform.traits.pollenRate = Math.ceil(580*Math.random());
+		lifeform.traits.pollenPeriod = Math.ceil(600*Math.random());
 		lifeform.traits.pollenSize = (3*Math.random());
 		lifeform.traits.reproductionRate = Math.random();
-		lifeform.traits.germinationPeriod = Math.ceil(500*Math.random());
+		lifeform.traits.germinationPeriod = Math.ceil(1200*Math.random());
 		lifeform.traits.radius = (20*Math.random());
 		lifeform.traits.age = 0;
 		lifeform.traits.alive = true;
@@ -142,10 +109,10 @@ function setup(){
 		lifeform.traits = new Object();
 
 		lifeform.traits.age = 0;
-		lifeform.traits.growthPeriod = Math.ceil(1000*Math.random());
+		lifeform.traits.growthPeriod = Math.ceil(1600*Math.random());
 		lifeform.traits.fullHealth = maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
-		lifeform.traits.reproductionRate = 0.5+0.5*Math.random();
+		lifeform.traits.reproductionRate = Math.random();
 		lifeform.traits.radius = Math.ceil(30*Math.random());
 		lifeform.traits.mass = Math.pow(lifeform.traits.radius,2);
 		lifeform.traits.speed = Math.random()*maxSpeed;
@@ -183,22 +150,6 @@ function setup(){
 function updateScreen(){
 	ctx.fillStyle = "rgba(255,255,255,.2)";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	if(debug){
-		for(var x = 0; x < gridSize; x++){
-			ctx.beginPath();
-			ctx.moveTo(x*width/gridSize,0);
-			ctx.lineTo((x*width/gridSize),(height));
-			ctx.fill();
-			ctx.stroke();
-		}
-		for(var y = 0; y < gridSize; y++){
-			ctx.beginPath();
-			ctx.moveTo(0,y*height/gridSize);
-			ctx.lineTo((width),(y*height/gridSize));
-			ctx.fill();
-			ctx.stroke();
-		}
-	}
 	for (var i = 0; i < producers.length; i++) {
 		particle = producers[i];
 		if(!particle.traits.alive){
@@ -241,32 +192,10 @@ function updateScreen(){
 		ctx.fill();
 		ctx.stroke();
 	}
-	if(debug){
-		ctx.beginPath();
-		var colorString = 'rgb(0,255,255)';
-		ctx.strokeStyle = colorString;
-		ctx.arc(player.position.x, player.position.y, player.traits.radius, 0, 2 * PI);
-		ctx.fill();
-		ctx.stroke();
-	}
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function moveLifeForms(){
-	if(debug){
-		if(rightDown){
-			player.position.x += 5;
-		}
-		if(leftDown){
-			player.position.x -= 5;
-		}
-		if(upDown){
-			player.position.y -= 5;
-		}
-		if(downDown){
-			player.position.y += 5;
-		}
-	}
 	var lifeform;
 	for (var i = 0; i < herbivores.length; i++) {
 		lifeform = herbivores[i];
@@ -349,12 +278,12 @@ function generatePollen(){
 	var autotroph;
 	for(var i = 0; i < producers.length; i++){
 		autotroph = producers[i];
-		if(autotroph.traits.age <= 0 && frameNumber%autotroph.traits.pollenRate==0){
+		if(autotroph.traits.age <= 0 && frameNumber%autotroph.traits.pollenPeriod==0){
 			var gamete = new Object();
 			gamete.position = new Object();
 			gamete.velocity = new Object();
 			gamete.traits = new Object();
-			gamete.traits.pollenRate = autotroph.traits.pollenRate;
+			gamete.traits.pollenPeriod = autotroph.traits.pollenPeriod;
 			gamete.traits.pollenSize = Math.max(autotroph.traits.pollenSize,0.01);
 			gamete.traits.reproductionRate = autotroph.traits.reproductionRate;
 			gamete.traits.germinationPeriod = autotroph.traits.germinationPeriod;
@@ -377,7 +306,7 @@ function newProducer(mother, father){
 	child.position = new Object();
 	child.velocity = new Object();
 	child.traits = new Object();
-	child.traits.pollenRate = Math.ceil(((mother.traits.pollenRate+father.traits.pollenRate)/2)+10*(Math.random()-0.5));
+	child.traits.pollenPeriod = Math.ceil(((mother.traits.pollenPeriod+father.traits.pollenPeriod)/2)+10*(Math.random()-0.5));
 	child.traits.pollenSize = (((mother.traits.pollenSize+father.traits.pollenSize)/2)+2*(Math.random()-0.5));
 	child.traits.reproductionRate = Math.max(Math.min(((mother.traits.reproductionRate+father.traits.reproductionRate)/2)+0.1*(Math.random()-0.5),1),0); //makes sure this value remains between zero and one
 	child.traits.germinationPeriod = ((mother.traits.germinationPeriod+father.traits.germinationPeriod)/2)+10*(Math.random()-0.5);
@@ -498,7 +427,7 @@ function reproduce(){
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 			if(distance<=herbivore1.traits.radius+herbivore2.traits.radius && Math.random()<(herbivore1.traits.reproductionRate+herbivore2.traits.reproductionRate)/2){
 				if(herbivore1.traits.age <= 0 && herbivore2.traits.age <= 0){
-					var numChilds = Math.ceil(Math.random() * 8);
+					var numChilds = Math.ceil(Math.random() * 3);
 					for(var i = 0; i < numChilds; i++){
 						newHerbivore(herbivore1, herbivore2);
 					}
@@ -571,34 +500,6 @@ function consume(){
 			}
 		}
 	}
-	if(debug){
-		full=false;
-		area = getArea(player);
-		console.log("Player is in area " + Math.min(Math.max(Math.floor(gridSize*player.position.x/width),0),gridSize-1) + ", " + Math.min(Math.max(Math.floor(gridSize*player.position.y/height),0),gridSize-1));
-		for(var f = 0; f < area.length && !full; f++){
-			food = area[f];
-			if(food.traits.alive){
-				var xDistance = player.position.x - food.position.x;
-				var yDistance = player.position.y - food.position.y;
-				distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-				if(distance<=player.traits.radius+food.traits.radius){
-					plantNumber--;
-					for(var i = 0; i < producers.length; i++){
-						producers[i].traits.index=i;
-						console.log("Updated, producers["+i+"]'s index is now " + producers[i].traits.index);
-					}
-					console.log(food.traits.radius + " goes with " + producers[food.traits.index].traits.radius);
-					food.traits.alive=false;
-					producers.splice(food.traits.index, 1);
-					area.splice(f, 1);
-					full=true;
-				}
-			}
-			else{
-				area.splice(f, 1);
-			}
-		}
-	}
 	for(var p = 0; p < carnivores.length; p++){
 		predator = carnivores[p];
 		for(var f = 0; f < herbivores.length; f++){
@@ -631,6 +532,14 @@ function logData(){
 		}
 		avgGermPeriod/=producers.length;
 		data.push(avgGermPeriod);
+	}
+	else if(logging=="Pollen period"){
+		var avgpollenPeriod=0;
+		for(var i = 0; i < producers.length; i++){
+			avgpollenPeriod+=producers[i].traits.pollenPeriod;
+		}
+		avgpollenPeriod/=producers.length;
+		data.push(avgpollenPeriod);
 	}
 }
 
@@ -685,21 +594,24 @@ function makePopGraph(){
 function makeGraph(){
 	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
 	var maxY=0;
+	var minY=data[0];
 	for(var i = 0; i < data.length; i++){
 		maxY=Math.max(maxY,data[i]);
+		minY=Math.min(minY,data[i]);
 	}
-	var virtScale = height/maxY;
-	var horScale = 3*width/data.length;
+	var virtScale = height/(maxY-minY);
+	var horScale = width/data.length;
 	for(var i = 1; i < data.length; i++){
 		ctx.beginPath();
 		var colorString = 'rgb(0,0,0)';
 		ctx.strokeStyle = colorString;
-		ctx.moveTo(horScale*(i-1),height-virtScale*data[i-1]);
-		ctx.lineTo(horScale*i,height-virtScale*data[i]);
+		ctx.moveTo(horScale*(i-1),height-virtScale*(data[i-1]-minY));
+		ctx.lineTo(horScale*i,height-virtScale*(data[i]-minY));
 		ctx.fill();
 		ctx.stroke();
 	}
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	console.log(data);
 };
 
 $("#controls-log").click(function() {
