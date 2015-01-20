@@ -152,6 +152,7 @@ function setup(){
 		lifeform.traits.reproductionRate = Math.random()*0.5+0.5;
 		lifeform.traits.radius = Math.ceil(40*Math.random());
 		lifeform.traits.speed = Math.random()*maxSpeed;
+		lifeform.traits.eaten = false;
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
 		lifeform.position.y = lifeform.traits.radius+(Math.random()*(height-lifeform.traits.radius));
 		angle = 2*PI*Math.random();
@@ -519,7 +520,7 @@ function reproduce(){
 			var yDistance = carnivore1.position.y - carnivore2.position.y;
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 			if(distance<=carnivore1.traits.radius+carnivore2.traits.radius && Math.random()<(carnivore1.traits.reproductionRate+carnivore2.traits.reproductionRate)/2){
-				if(carnivore1.traits.age <= 0 && carnivore2.traits.age <= 0){
+				if(carnivore1.traits.age <= 0 && carnivore2.traits.age <= 0 && carnivore1.traits.eaten && carnivore2.traits.eaten){
 					newCarnivore(carnivore1, carnivore2);
 					carnivore1.traits.age = 2*carnivore1.traits.growthPeriod/3;
 					carnivore2.traits.age = 2*carnivore2.traits.growthPeriod/3;
@@ -578,6 +579,7 @@ function consume(){
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 			if(distance<=predator.traits.radius+food.traits.radius){
 				predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2));
+				predator.traits.eaten=true;
 				plantNumber--;
 				herbivores.splice(food.traits.index, 1);
 				for(var i=0; i < herbivores.length; i++){
