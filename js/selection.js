@@ -8,11 +8,11 @@ var carnivores=[];
 var pollen=[];
 var width = canvas.width;
 var height = canvas.height;
-var numProducers = 200;
-var numHerbivores = 20;
-var numCarnivores = 2;
+var numProducers = 50;
+var numHerbivores = 30;
+var numCarnivores = 5;
 var maxSpeed = 3;
-var maxSize = 80;
+var maxSize = 100;
 var maxPollenSize = 3;
 var PI = 3.141592;
 var frameNumber  = 0;
@@ -45,12 +45,12 @@ function addPlantToArea(lifeform){
 	var possibleX = [];
 	var possibleY = [];
 	for(var x = 0; x < gridSize; x++){
-		if(lifeform.position.x + lifeform.traits.radius + maxSize >= ((x)*width/gridSize) && (lifeform.position.x <= ((x+1)*width/gridSize) + lifeform.traits.radius + maxSize)){
+		if(lifeform.position.x + lifeform.traits.radius + maxSize/3 >= ((x)*width/gridSize) && (lifeform.position.x <= ((x+1)*width/gridSize) + lifeform.traits.radius + maxSize/3)){ //maxSize/3 is largest herbivore size
 			possibleX.push(x);
 		}
 	}
 	for(var y = 0; y < gridSize; y++){
-		if(lifeform.position.y + lifeform.traits.radius + maxSize >= ((y)*height/gridSize) && (lifeform.position.y <= ((y+1)*height/gridSize) + lifeform.traits.radius + maxSize)){
+		if(lifeform.position.y + lifeform.traits.radius + maxSize/3 >= ((y)*height/gridSize) && (lifeform.position.y <= ((y+1)*height/gridSize) + lifeform.traits.radius + maxSize/3)){
 			possibleY.push(y);
 		}
 	}
@@ -85,8 +85,8 @@ function setup(){
 		lifeform.traits.pollenSize = (3*Math.random());
 		lifeform.traits.reproductionRate = Math.random();
 		lifeform.traits.germinationPeriod = Math.ceil(1200*Math.random());
-		lifeform.traits.radius = (30*Math.random());
-		lifeform.traits.age = 0;
+		lifeform.traits.radius = (maxSize*Math.random()/3);
+		lifeform.traits.age = lifeform.traits.germinationPeriod;
 		lifeform.traits.alive = true;
 		lifeform.traits.nutrientDemand = Math.max(maxDeplenishRate * Math.random(),1);
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
@@ -121,15 +121,15 @@ function setup(){
 		lifeform.velocity = new Object();
 		lifeform.traits = new Object();
 
-		lifeform.traits.age = 0;
 		lifeform.traits.growthPeriod = Math.ceil(1600*Math.random());
 		lifeform.traits.fullHealth = maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
 		lifeform.traits.reproductionRate = 0.75 + 0.25 * Math.random();
-		lifeform.traits.radius = Math.ceil(30*Math.random());
+		lifeform.traits.radius = Math.ceil(maxSize*Math.random()/3);
 		lifeform.traits.mass = Math.pow(lifeform.traits.radius,2);
 		lifeform.traits.speed = Math.random()*maxSpeed;
 		lifeform.traits.eaten = false;
+		lifeform.traits.age = lifeform.traits.growthPeriod;
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
 		lifeform.position.y = lifeform.traits.radius+(Math.random()*(height-lifeform.traits.radius));
 		angle = 2*PI*Math.random();
@@ -144,14 +144,13 @@ function setup(){
 		lifeform.position = new Object();
 		lifeform.velocity = new Object();
 		lifeform.traits = new Object();
-
-		lifeform.traits.age = 0;
 		lifeform.traits.growthPeriod = Math.ceil(1000*Math.random());
 		lifeform.traits.fullHealth = 2*maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
 		lifeform.traits.reproductionRate = Math.random()*0.5+0.5;
 		lifeform.traits.radius = Math.ceil(40*Math.random());
-		lifeform.traits.speed = Math.random()*maxSpeed/2;
+		lifeform.traits.speed = Math.random()*maxSpeed;
+		lifeform.traits.age = lifeform.traits.growthPeriod;
 		lifeform.traits.eaten = false;
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
 		lifeform.position.y = lifeform.traits.radius+(Math.random()*(height-lifeform.traits.radius));
@@ -552,8 +551,8 @@ function consume(){
 				var xDistance = predator.position.x - food.position.x;
 				var yDistance = predator.position.y - food.position.y;
 				distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-				if(distance<=predator.traits.radius+food.traits.radius && (predator.traits.fullHealth-predator.traits.health)>Math.pow(food.traits.radius,2)){
-					predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2));
+				if(distance<=predator.traits.radius+food.traits.radius && (predator.traits.fullHealth-predator.traits.health)>Math.pow(food.traits.radius,2)/2){
+					predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2)/2);
 					predator.traits.eaten=true;
 					plantNumber--;
 					food.traits.alive=false;
