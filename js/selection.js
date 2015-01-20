@@ -125,7 +125,7 @@ function setup(){
 		lifeform.traits.growthPeriod = Math.ceil(1600*Math.random());
 		lifeform.traits.fullHealth = maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
-		lifeform.traits.reproductionRate = 0.5*Math.random();
+		lifeform.traits.reproductionRate = 0.75 + 0.25 * Math.random();
 		lifeform.traits.radius = Math.ceil(30*Math.random());
 		lifeform.traits.mass = Math.pow(lifeform.traits.radius,2);
 		lifeform.traits.speed = Math.random()*maxSpeed;
