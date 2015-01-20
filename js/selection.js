@@ -129,6 +129,7 @@ function setup(){
 		lifeform.traits.radius = Math.ceil(30*Math.random());
 		lifeform.traits.mass = Math.pow(lifeform.traits.radius,2);
 		lifeform.traits.speed = Math.random()*maxSpeed;
+		lifeform.traits.eaten = false;
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
 		lifeform.position.y = lifeform.traits.radius+(Math.random()*(height-lifeform.traits.radius));
 		angle = 2*PI*Math.random();
@@ -493,7 +494,7 @@ function reproduce(){
 			var yDistance = herbivore1.position.y - herbivore2.position.y;
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 			if(distance<=herbivore1.traits.radius+herbivore2.traits.radius && Math.random()<(herbivore1.traits.reproductionRate+herbivore2.traits.reproductionRate)/2){
-				if(herbivore1.traits.age <= 0 && herbivore2.traits.age <= 0){
+				if(herbivore1.traits.age <= 0 && herbivore2.traits.age <= 0 && herbivore1.traits.eaten && herbivore2.traits.eaten){
 					var numChilds = Math.ceil(Math.random() * 6);
 					for(var i = 0; i < numChilds; i++){
 						newHerbivore(herbivore1, herbivore2);
@@ -552,6 +553,7 @@ function consume(){
 				distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 				if(distance<=predator.traits.radius+food.traits.radius){
 					predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2));
+					predator.traits.eaten=true;
 					plantNumber--;
 					food.traits.alive=false;
 					producers.splice(food.traits.index, 1);
