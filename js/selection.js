@@ -12,7 +12,7 @@ var numProducers = 100;
 var numHerbivores = 30;
 var numCarnivores = 8;
 var maxSpeed = 3;
-var maxSize = 70;
+var maxSize = 800;
 var maxPollenSize = 3;
 var PI = 3.141592;
 var frameNumber  = 0;
@@ -85,7 +85,7 @@ function setup(){
 		lifeform.traits.pollenSize = (3*Math.random());
 		lifeform.traits.reproductionRate = Math.random();
 		lifeform.traits.germinationPeriod = Math.ceil(1200*Math.random());
-		lifeform.traits.radius = (20*Math.random());
+		lifeform.traits.radius = (30*Math.random());
 		lifeform.traits.age = 0;
 		lifeform.traits.alive = true;
 		lifeform.traits.nutrientDemand = Math.max(maxDeplenishRate * Math.random(),1);
@@ -423,7 +423,7 @@ function newHerbivore(mother, father){
 	child.traits.mass = Math.pow(child.traits.radius,2);
 	child.position.x = (mother.position.x + father.position.x)/2;
 	child.position.y = (mother.position.y + father.position.y)/2;
-	child.traits.speed = Math.max(Math.min(mother.traits.speed+father.traits.speed+0.4*(Math.random()-0.5),maxSpeed),0.1);
+	child.traits.speed = Math.max(Math.min((mother.traits.speed+father.traits.speed)/2+0.4*(Math.random()-0.5),maxSpeed),0.1);
 	var angle = 2*PI*Math.random();
 	child.velocity.x = child.traits.speed*Math.cos(angle);
 	child.velocity.y = child.traits.speed*Math.sin(angle);
