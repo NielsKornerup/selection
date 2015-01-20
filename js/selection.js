@@ -552,8 +552,8 @@ function consume(){
 				var xDistance = predator.position.x - food.position.x;
 				var yDistance = predator.position.y - food.position.y;
 				distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-				if(distance<=predator.traits.radius+food.traits.radius && (predator.traits.fullHealth-predator.traits.health)>Math.pow(food.traits.radius,2)){
-					predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2));
+				if(distance<=predator.traits.radius+food.traits.radius && (predator.traits.fullHealth-predator.traits.health)>Math.pow(food.traits.radius,2)/2){
+					predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2)/2);
 					predator.traits.eaten=true;
 					plantNumber--;
 					food.traits.alive=false;
@@ -577,8 +577,8 @@ function consume(){
 			var xDistance = predator.position.x - food.position.x;
 			var yDistance = predator.position.y - food.position.y;
 			distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-			if(distance<=predator.traits.radius+food.traits.radius){
-				predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2));
+			if(distance<=predator.traits.radius+food.traits.radius && (predator.traits.fullHealth-predator.traits.health)>Math.pow(food.traits.radius,2)/2){){
+				predator.traits.health=Math.min(predator.traits.fullHealth, predator.traits.health+Math.pow(food.traits.radius,2)/2);
 				predator.traits.eaten=true;
 				plantNumber--;
 				herbivores.splice(food.traits.index, 1);
