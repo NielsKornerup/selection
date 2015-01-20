@@ -11,7 +11,7 @@ var height = canvas.height;
 var numProducers = 100;
 var numHerbivores = 30;
 var numCarnivores = 8;
-var maxSpeed = 1.5;
+var maxSpeed = 3;
 var maxSize = 70;
 var maxPollenSize = 3;
 var PI = 3.141592;
@@ -151,7 +151,7 @@ function setup(){
 		lifeform.traits.health = lifeform.traits.fullHealth;
 		lifeform.traits.reproductionRate = Math.random()*0.5+0.5;
 		lifeform.traits.radius = Math.ceil(40*Math.random());
-		lifeform.traits.speed = Math.random()*maxSpeed;
+		lifeform.traits.speed = Math.random()*maxSpeed/2;
 		lifeform.traits.eaten = false;
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
 		lifeform.position.y = lifeform.traits.radius+(Math.random()*(height-lifeform.traits.radius));
