@@ -125,7 +125,7 @@ function setup(){
 		lifeform.traits.growthPeriod = Math.ceil(1600*Math.random());
 		lifeform.traits.fullHealth = maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
-		lifeform.traits.reproductionRate = 0.5-0.5*Math.random();
+		lifeform.traits.reproductionRate = 0.75-0.25*Math.random();
 		lifeform.traits.radius = Math.ceil(maxSize*Math.random()/2);
 		lifeform.traits.mass = Math.pow(lifeform.traits.radius,2);
 		lifeform.traits.speed = 1 + Math.random()*(maxSpeed-1);
@@ -631,6 +631,21 @@ function logData(){
 		avgNutrientDemand/=producers.length;
 		data.push(avgNutrientDemand);
 	}
+	else if(logging=="Full health"){
+		var avgFullHealth=0;
+		for(var i = 0; i < herbivores.length; i++){
+			avgFullHealth+=herbivores[i].traits.fullHealth;
+		}
+		avgFullHealth/=herbivores.length;
+		data.push(avgFullHealth);
+		
+		avgFullHealth=0;
+		for(var i = 0; i < carnivores.length; i++){
+			avgFullHealth+=carnivores[i].traits.fullHealth;
+		}
+		avgFullHealth/=carnivores.length;
+		data.push(avgFullHealth);
+	}
 }
 
 function move(){
@@ -677,6 +692,35 @@ function makePopGraph(){
 		ctx.strokeStyle = colorString;
 		ctx.moveTo(horScale*Math.floor((i/3)-1),height-virtScale*data[i-3]);
 		ctx.lineTo(horScale*Math.floor((i/3)),height-virtScale*data[i]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+};
+
+function makeHealthGraph(){
+	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+	var maxY=0;
+	for(var i = 0; i < data.length; i++){
+		maxY=Math.max(maxY,data[i]);
+	}
+	var virtScale = height/maxY;
+	var horScale = 3*width/data.length;
+	for(var i = 2; i < data.length; i+=2){
+		ctx.beginPath();
+		var colorString = 'rgb(0,0,255)';
+		ctx.strokeStyle = colorString;
+		ctx.moveTo(horScale*Math.floor((i/2)-1),height-virtScale*data[i-2]);
+		ctx.lineTo(horScale*Math.floor((i/2)),height-virtScale*data[i]);
+		ctx.fill();
+		ctx.stroke();
+	}
+	for(var i = 3; i < data.length; i+=2){
+		ctx.beginPath();
+		var colorString = 'rgb(255,0,0)';
+		ctx.strokeStyle = colorString;
+		ctx.moveTo(horScale*Math.floor((i/2)-1),height-virtScale*data[i-2]);
+		ctx.lineTo(horScale*Math.floor((i/2)),height-virtScale*data[i]);
 		ctx.fill();
 		ctx.stroke();
 	}
@@ -733,6 +777,9 @@ function main() {
 	}
 	else if(logging=="Population sizes"){
 		makePopGraph();
+	}
+	else if(logging=="Full health"){
+		makeHealthGraph();
 	}
 	else{
 		makeGraph();
