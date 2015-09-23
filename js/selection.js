@@ -10,17 +10,17 @@ var width = canvas.width;
 var height = canvas.height;
 var numProducers = 100;
 var numHerbivores = 40;
-var numCarnivores = 5;
+var numCarnivores = 6;
 var maxSpeed = 3;
 var maxSize = 40;
 var maxPollenSize = 3;
 var PI = 3.141592;
-var frameNumber  = 0;
-var plantNumber = 0;
-var maxHealth = 2000;
+var maxHealth = 4000;
 var gridSize=40;
 var areas = [];
 var arr = [];
+var plantNumber=0;
+var frameNumber=0;
 var data = [];
 var logging = "Population sizes";
 var graph = false;
@@ -71,6 +71,8 @@ function getPlants(obj){
 	return areas[x][y].plants;
 }
 function setup(){
+	document.getElementById("resume").style.display="none";
+	document.getElementById("restart").style.display="none";
 	var lifeform;
 	var angle = 0;
 	for(var i = 0; i < numProducers; i++){
@@ -150,7 +152,7 @@ function setup(){
 		lifeform.traits.fullHealth = maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
 		lifeform.traits.reproductionRate =0.5+0.5*Math.random();
-		lifeform.traits.radius = Math.ceil(maxSize*Math.random());
+		lifeform.traits.radius = Math.ceil(maxSize*Math.random() +5);
 		lifeform.traits.speed = 1 + Math.random()*(maxSpeed-1);
 		lifeform.traits.eaten = false;
 		lifeform.position.x = lifeform.traits.radius+(Math.random()*(width-lifeform.traits.radius));
@@ -703,7 +705,6 @@ function makeGraph(){
 		ctx.stroke();
 	}
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	console.log(data);
 };
 
 $("#controls-log").click(function() {
@@ -721,6 +722,32 @@ $("#controls-log").click(function() {
 
 $("#controls-graph").click(function() {
 	graph=true;
+	document.getElementById("controls-graph").style.display="none";
+	document.getElementById("resume").style.display="initial";
+	document.getElementById("restart").style.display="initial";
+});
+
+$("#resume").click(function(){
+	graph=false;
+	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+	document.getElementById("controls-graph").style.display="initial";
+	document.getElementById("resume").style.display="none";
+	document.getElementById("restart").style.display="none";
+});
+
+$("#restart").click(function(){
+	graph=false;
+	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+	producers=[];
+	herbivores=[];
+	carnivores=[];
+	pollen=[];
+	areas = [];
+	frameNumber  = 0;
+	plantNumber = 0;
+	document.getElementById("controls-graph").style.display="initial";
+	
+	setup();	
 });
 
 setup();
@@ -729,7 +756,6 @@ function main() {
 	if(!graph){
 		move();
 		updateScreen();
-		requestAnimationFrame(main);
 	}
 	else if(logging=="Population sizes"){
 		makePopGraph();
@@ -737,5 +763,6 @@ function main() {
 	else{
 		makeGraph();
 	}
+	requestAnimationFrame(main);
 };
 requestAnimationFrame(main);
