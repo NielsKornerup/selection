@@ -787,8 +787,23 @@ $("#restart").click(function(){
 	carnivores=[];
 	pollen=[];
 	areas = [];
+	for(var a = 0; a < gridSize; a++){
+		arr = [];
+		areas.push(arr);
+		for(var b = 0; b < gridSize; b++){
+			arr=[];
+			areas[a].push(arr);
+			areas[a][b]=new Object();
+			areas[a][b].plants=[];
+			areas[a][b].nutrients=maxNutrients;
+			areas[a][b].oldNutrients = areas[a][b].nutrients;
+		}
+	}
+
+	data = [];
 	frameNumber  = 0;
 	plantNumber = 0;
+	
 	document.getElementById("controls-graph").style.display="initial";
 	
 	setup();	
