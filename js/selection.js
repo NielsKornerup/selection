@@ -8,8 +8,8 @@ var carnivores=[];
 var pollen=[];
 var width = canvas.width;
 var height = canvas.height;
-var numProducers = 100;
-var numHerbivores = 40;
+var numProducers = 200;
+var numHerbivores = 30;
 var numCarnivores = 6;
 var maxSpeed = 3;
 var maxSize = 40;
@@ -25,7 +25,7 @@ var data = [];
 var logging = "Population sizes";
 var graph = false;
 var debug = false;
-var selfReproduction = true;
+var selfReproduction = false;
 var maxNutrients=200;
 var maxDeplenishRate = 20;
 for(var a = 0; a < gridSize; a++){
@@ -83,7 +83,7 @@ function setup(){
 
 		lifeform.traits.id=plantNumber;
 		plantNumber++;
-		lifeform.traits.pollenPeriod = Math.ceil(300*Math.random());
+		lifeform.traits.pollenPeriod = Math.ceil(200*Math.random());
 		lifeform.traits.pollenSize = (3*Math.random());
 		lifeform.traits.reproductionRate = 0.8 + 0.2*Math.random();
 		lifeform.traits.germinationPeriod = Math.ceil(600*Math.random());
@@ -151,7 +151,7 @@ function setup(){
 		lifeform.traits.growthPeriod = Math.ceil(1000*Math.random());
 		lifeform.traits.fullHealth = maxHealth*Math.random();
 		lifeform.traits.health = lifeform.traits.fullHealth;
-		lifeform.traits.reproductionRate =0.5+0.5*Math.random();
+		lifeform.traits.reproductionRate =0.8+0.2*Math.random();
 		lifeform.traits.radius = Math.ceil(maxSize*Math.random() +5);
 		lifeform.traits.speed = 1 + Math.random()*(maxSpeed-1);
 		lifeform.traits.eaten = false;
@@ -812,8 +812,9 @@ $("#restart").click(function(){
 setup();
 
 function main() {
+	move();
 	if(!graph){
-		move();
+		//move();
 		updateScreen();
 	}
 	else if(logging=="Population sizes"){
