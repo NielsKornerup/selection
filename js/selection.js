@@ -924,7 +924,6 @@ setup();
 function main() {
 	move();
 	if(!graph){
-		//move();
 		updateScreen();
 	}
 	else if(logging=="Population sizes" || logging=="Radius" || logging=="Reproduction rate"){
